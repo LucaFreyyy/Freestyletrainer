@@ -1,5 +1,6 @@
 import random
 import requests
+import chess
 
 class Lichess_Move_Selector:
     def __init__(self):
@@ -28,6 +29,9 @@ class Lichess_Move_Selector:
 
         # Select a move at random based on the probabilities
         selected_move = random.choices(moves, probabilities)[0]
+
+        # Convert the UCI move to a chess.Move object
+        selected_move = chess.Move.from_uci(selected_move)
 
         return selected_move
     

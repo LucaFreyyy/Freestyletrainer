@@ -24,6 +24,7 @@ class ChessBoard(tk.Canvas):
         self.highlight_squares = []
         self.flipped = False
         self.piece_images = {}
+        self.lichess_selector = Lichess_Move_Selector()
         
         # Initialize chess components
         self.board = chess.Board()
@@ -150,10 +151,34 @@ class ChessBoard(tk.Canvas):
                 self.on_move_made(san, is_white_move)
             
             self.draw_board()
+
+            # Let Lichess_Move_Selector play the next move if applicable
+            if (self.board.turn == chess.BLACK and not self.flipped) or (self.board.turn == chess.WHITE and self.flipped):
+                self.play_lichess_move()
         else:
             # Invalid move - just deselect
             self.selected_square = None
             self.highlight_squares = []
+            self.draw_board()
+
+    def play_lichess_move(self):
+        move = self.lichess_selector.select_move(self.board)
+        if move in self.board.legal_moves:
+            # Generate SAN before pushing the move
+            try:
+                san = self.board.san(move)
+            except AssertionError:
+                san = move.uci()  # Fallback to UCI notation
+            
+            # Push move and update board
+            self.board.push(move)
+            self.selected_square = None
+            self.highlight_squares = []
+            
+            # Pass color information to move list
+            if self.on_move_made:
+                self.on_move_made(san, self.board.turn == chess.WHITE)
+            
             self.draw_board()
 
     def new_game(self):
@@ -161,6 +186,8 @@ class ChessBoard(tk.Canvas):
         self.selected_square = None
         self.highlight_squares = []
         self.draw_board()
+        if self.flipped:
+            self.play_lichess_move()
 
     def flip_board(self):
         self.flipped = not self.flipped

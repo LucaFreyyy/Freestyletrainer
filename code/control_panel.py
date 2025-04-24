@@ -10,8 +10,12 @@ class ControlPanel(tk.Frame):
 
     def create_widgets(self):
         tk.Button(self, text="New Game", command=self.new_game).pack(pady=5)
-        tk.Button(self, text="Flip Board", command=self.chess_board.flip_board).pack(pady=5)
+        tk.Button(self, text="Flip Board", command=self.flip_board).pack(pady=5)
 
     def new_game(self):
         self.chess_board.new_game()
         self.move_list.clear()
+
+    def flip_board(self):
+        self.chess_board.flip_board()
+        self.new_game()
