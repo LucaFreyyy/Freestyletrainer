@@ -54,7 +54,7 @@ class ChessBoard(tk.Canvas):
                 # Calculate chess coordinates based on flip state
                 if self.flipped:
                     chess_rank = rank
-                    chess_file = file
+                    chess_file = TOP_RANK_INDEX - file
                 else:
                     chess_rank = TOP_RANK_INDEX - rank
                     chess_file = file
@@ -86,7 +86,7 @@ class ChessBoard(tk.Canvas):
         rank = event.y // TILE_SIZE
         
         if self.flipped:
-            chess_file = file
+            chess_file = 7 - file
             chess_rank = rank
         else:
             chess_file = file
@@ -101,8 +101,6 @@ class ChessBoard(tk.Canvas):
                 self.selected_square = square
                 self.highlight_squares = [move.to_square for move in self.board.legal_moves 
                                         if move.from_square == square]
-                if self.flipped:
-                    self.highlight_squares = [chess.square(7 - chess.square_file(sq), chess.square_rank(sq)) for sq in self.highlight_squares]
                 self.draw_board()
             return
 
@@ -118,8 +116,6 @@ class ChessBoard(tk.Canvas):
             self.selected_square = square
             self.highlight_squares = [move.to_square for move in self.board.legal_moves 
                                     if move.from_square == square]
-            if self.flipped:
-                self.highlight_squares = [chess.square(7 - chess.square_file(sq), chess.square_rank(sq)) for sq in self.highlight_squares]
             self.draw_board()
             return
 
