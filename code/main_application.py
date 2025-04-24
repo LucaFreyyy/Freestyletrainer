@@ -20,8 +20,8 @@ class MainApplication(tk.Tk):
         self.main_frame.pack(fill=tk.BOTH, expand=True)
         
         # Create components
-        self.chess_board = ChessBoard(self.main_frame, self.on_move_made)
         self.move_list = MoveList(self.main_frame)
+        self.chess_board = ChessBoard(self.main_frame, self.on_move_made)
         self.control_panel = ControlPanel(self.main_frame, self.chess_board, self.move_list)
         
         # Layout components

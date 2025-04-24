@@ -13,8 +13,8 @@ class ControlPanel(tk.Frame):
         tk.Button(self, text="Flip Board", command=self.flip_board).pack(pady=5)
 
     def new_game(self):
-        self.chess_board.new_game()
         self.move_list.clear()
+        self.chess_board.new_game()
 
     def flip_board(self):
         self.chess_board.flip_board()

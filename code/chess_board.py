@@ -177,7 +177,7 @@ class ChessBoard(tk.Canvas):
             
             # Pass color information to move list
             if self.on_move_made:
-                self.on_move_made(san, self.board.turn == chess.WHITE)
+                self.on_move_made(san, self.board.turn == chess.BLACK)
             
             self.draw_board()
 
