@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 
 # local imports
 from constants import *
+from lichess_move_selection import Lichess_Move_Selector
 
 # class specific constants
 TILE_SIZE = 60
