@@ -28,7 +28,9 @@ class ChessBoard(tk.Canvas):
         
         # Initialize chess components
         self.board = chess.Board(chess960=True)
-        self.board.set_chess960_pos(random.randint(0, 959))
+        self.start_position_id = random.randint(0, 959)
+        self.board.set_chess960_pos(self.start_position_id)
+        self.start_position_fen = self.board.fen()
         self.load_piece_images()
         self.draw_board()
         self.bind("<Button-1>", self.on_click)
@@ -180,7 +182,9 @@ class ChessBoard(tk.Canvas):
 
     def new_game(self):
         self.board.reset()
-        self.board.set_chess960_pos(random.randint(0, 959))
+        self.start_position_id = random.randint(0, 959)
+        self.board.set_chess960_pos(self.start_position_id)
+        self.start_position_fen = self.board.fen()
         self.selected_square = None
         self.highlight_squares = []
         self.draw_board()
