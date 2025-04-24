@@ -119,11 +119,15 @@ class ChessBoard(tk.Canvas):
 
         # Check if the clicked square contains our own piece (for piece switching)
         if piece and piece.color == self.board.turn:
-            self.selected_square = square
-            self.highlight_squares = [move.to_square for move in self.board.legal_moves 
-                                    if move.from_square == square]
-            self.draw_board()
-            return
+            # Allow switching pieces only if the selected square is not part of a move
+            if self.selected_square is not None:
+                potential_move = chess.Move(self.selected_square, square)
+            if potential_move not in self.board.legal_moves:
+                self.selected_square = square
+                self.highlight_squares = [move.to_square for move in self.board.legal_moves 
+                            if move.from_square == square]
+                self.draw_board()
+                return
 
         # Try to make a move
         move = chess.Move(self.selected_square, square)
