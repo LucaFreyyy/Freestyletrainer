@@ -60,7 +60,6 @@ class ChessGUI:
                     symbol = piece.symbol().upper()
                     image_key = f"{color}{symbol}"
                     self.canvas.create_image(x1, y1, anchor=tk.NW, image=self.piece_images[image_key])
-
                     
         for square in self.highlight_squares:
             file = chess.square_file(square)
@@ -78,16 +77,28 @@ class ChessGUI:
         square = chess.square(file, rank)
 
         if self.selected_square is None:
-            if self.board.piece_at(square) is not None:
+            # Check if the clicked square has a piece of the current player's color
+            piece = self.board.piece_at(square)
+            if piece is not None and piece.color == self.board.turn:
                 self.selected_square = square
                 self.highlight_squares = [move.to_square for move in self.board.legal_moves if move.from_square == square]
         else:
+            # Attempt to make a move
             move = chess.Move(self.selected_square, square)
             if move in self.board.legal_moves:
                 self.board.push(move)
-            self.selected_square = None
-            self.highlight_squares = []
+                self.selected_square = None
+                self.highlight_squares = []
+            else:
+                # Check if the clicked square is another piece of the current player's color
+                clicked_piece = self.board.piece_at(square)
+                if clicked_piece is not None and clicked_piece.color == self.board.turn:
+                    # Select the new piece
+                    self.selected_square = square
+                    self.highlight_squares = [move.to_square for move in self.board.legal_moves if move.from_square == square]
+                else:
+                    # Deselect
+                    self.selected_square = None
+                    self.highlight_squares = []
         self.draw_board()
-
-
 
