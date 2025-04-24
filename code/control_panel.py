@@ -1,5 +1,9 @@
+# global imports
 import tkinter as tk
 import chess
+
+# local imports
+from position_eval import Evaluator
 
 class ControlPanel(tk.Frame):
     def __init__(self, parent, chess_board, move_list):
@@ -7,6 +11,10 @@ class ControlPanel(tk.Frame):
         self.chess_board = chess_board
         self.move_list = move_list
         self.start_position_number = tk.StringVar(value=self.get_start_position_number())
+        self.eval_label = tk.Label(self, text="Evaluation: ", font=('Arial', 12))
+        self.eval_label.pack(pady=5)
+        self.evaluator = Evaluator(self.eval_label)
+        self.chess_board.evaluator = self.evaluator
         self.create_widgets()
 
     def create_widgets(self):
@@ -14,7 +22,7 @@ class ControlPanel(tk.Frame):
         tk.Label(self, textvariable=self.start_position_number).pack(pady=5)
         tk.Button(self, text="New Game", command=self.new_game).pack(pady=5)
         tk.Button(self, text="Flip Board", command=self.flip_board).pack(pady=5)
-
+        
     def new_game(self):
         self.move_list.clear()
         self.chess_board.new_game()

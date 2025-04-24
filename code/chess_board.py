@@ -3,10 +3,12 @@ import tkinter as tk
 import chess
 import random
 from PIL import Image, ImageTk
+import requests
 
 # local imports
 from constants import *
 from lichess_move_selection import Lichess_Move_Selector
+from position_eval import Evaluator
 
 # class specific constants
 TILE_SIZE = 60
@@ -16,7 +18,7 @@ LIGHT_SQUARE_COLOR = "#F0D9B5"
 DARK_SQUARE_COLOR = "#B58863"
 
 class ChessBoard(tk.Canvas):
-    def __init__(self, parent, move_callback=None):
+    def __init__(self, parent, move_callback=None, evaluator=None):
         super().__init__(parent, width=8*TILE_SIZE, height=8*TILE_SIZE)
         self.parent = parent
         self.on_move_made = move_callback
@@ -25,6 +27,7 @@ class ChessBoard(tk.Canvas):
         self.flipped = False
         self.piece_images = {}
         self.lichess_selector = Lichess_Move_Selector()
+        self.evaluator = evaluator
         
         # Initialize chess components
         self.board = chess.Board(chess960=True)
@@ -151,6 +154,8 @@ class ChessBoard(tk.Canvas):
             
             self.draw_board()
 
+            self.evaluate_position()
+
             # Let Lichess_Move_Selector play the next move if applicable
             if (self.board.turn == chess.BLACK and not self.flipped) or (self.board.turn == chess.WHITE and self.flipped):
                 self.play_lichess_move()
@@ -180,6 +185,8 @@ class ChessBoard(tk.Canvas):
             
             self.draw_board()
 
+        self.evaluate_position()
+
     def new_game(self):
         self.board.reset()
         self.start_position_id = random.randint(0, 959)
@@ -194,3 +201,6 @@ class ChessBoard(tk.Canvas):
     def flip_board(self):
         self.flipped = not self.flipped
         self.draw_board()
+
+    def evaluate_position(self):
+        self.evaluator.fetch_evaluation_async(self.board.fen())
