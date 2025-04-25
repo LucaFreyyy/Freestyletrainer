@@ -171,7 +171,7 @@ class ChessBoard(tk.Canvas):
 
     def play_lichess_move(self):
         move = self.lichess_selector.select_move(self.board)
-        if move in self.board.legal_moves:
+        if move is not None and move in self.board.legal_moves:
             # Generate SAN before pushing the move
             try:
                 san = self.board.san(move)

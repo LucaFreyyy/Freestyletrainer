@@ -6,14 +6,15 @@ import chess
 from position_eval import Evaluator
 
 class ControlPanel(tk.Frame):
-    def __init__(self, parent, chess_board, move_list):
+    def __init__(self, parent, chess_board, move_list, eval_list):
         super().__init__(parent)
         self.chess_board = chess_board
         self.move_list = move_list
         self.start_position_number = tk.StringVar(value=self.get_start_position_number())
         self.eval_label = tk.Label(self, text="Evaluation: ", font=('Arial', 12))
         self.eval_label.pack(pady=5)
-        self.evaluator = Evaluator(self.eval_label)
+        self.eval_list = eval_list
+        self.evaluator = Evaluator(self.eval_label, self.eval_list)
         self.chess_board.evaluator = self.evaluator
         self.create_widgets()
 

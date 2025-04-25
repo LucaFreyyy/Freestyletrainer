@@ -1,12 +1,18 @@
+# global imports
 import requests
 from threading import Thread
+from stockfish import Stockfish
+
+# local imports
+from constants import *
 
 class Evaluator:
-    def __init__(self, eval_label):
+    def __init__(self, eval_label, eval_list):
         self.evaluation_cache = {}  # Store evaluations to avoid duplicate requests
         self.current_evaluation = None
         self.evaluation_thread = None
         self.eval_label = eval_label  # Reference to the label to update evaluation display
+        self.eval_list = eval_list  # Reference to the eval list to update evaluations
 
     def get_cloud_evaluation(self, fen):
         """Fetch evaluation from Lichess cloud API"""
@@ -23,24 +29,14 @@ class Evaluator:
                     return data
         except Exception as e:
             print(f"Error fetching evaluation: {e}")
-        return None
+
+        return self.get_stockfish_evaluation(fen)  # Fallback to local evaluation
     
     def update_evaluation_display(self):
-        """Update the evaluation display in the GUI"""
-        if self.current_evaluation:
-            eval_data = self.current_evaluation
-            cp = eval_data.get('pvs', [{}])[0].get('cp')
-            mate = eval_data.get('pvs', [{}])[0].get('mate')
-            
-            if mate:
-                eval_text = f"Mate in {abs(mate)}" + (" ♔" if mate > 0 else " ♚")
-            elif cp:
-                score = cp/100  # Convert centipawns to pawns
-                eval_text = f"{'+' if score > 0 else ''}{score:.1f}"
-            else:
-                eval_text = "No evaluation"
-
-            self.eval_label.config(text=eval_text)
+        current_eval = self.get_current_evaluation()
+        self.eval_label.config(text=current_eval)
+        is_white_move = self.current_evaluation.get('isWhiteMove', True)
+        self.eval_list.add_eval(current_eval, is_white_move)
 
     def fetch_evaluation_async(self, fen):
         """Fetch evaluation in background thread"""
@@ -55,3 +51,28 @@ class Evaluator:
             
         self.evaluation_thread = Thread(target=worker)
         self.evaluation_thread.start()
+
+    def get_stockfish_evaluation(self, fen):
+        stockfish = Stockfish(path=STOCKFISH_PATH, parameters={"Threads": 2, "Minimum Thinking Time": 30})
+        stockfish.set_fen_position(fen)
+        evaluation = stockfish.get_evaluation()
+        if evaluation["type"] == "cp":
+            return {"pvs": [{"cp": evaluation["value"]}]}
+        elif evaluation["type"] == "mate":
+            return {"pvs": [{"mate": evaluation["value"]}]}
+        else:
+            print(f"Stockfish evaluation: {evaluation}")
+            return None
+        
+    def get_current_evaluation(self):
+        if self.current_evaluation:
+            eval_data = self.current_evaluation
+            cp = eval_data.get('pvs', [{}])[0].get('cp')
+            mate = eval_data.get('pvs', [{}])[0].get('mate')
+            
+            if mate:
+                return f"Mate in {abs(mate)}" + (" ♔" if mate > 0 else " ♚")
+            elif cp:
+                score = cp/100
+                return f"{'+' if score > 0 else ''}{score:.1f}"
+        return "No eval"

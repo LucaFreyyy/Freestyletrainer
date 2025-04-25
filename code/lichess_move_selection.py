@@ -17,7 +17,7 @@ class Lichess_Move_Selector:
         move_statistics = {move['uci']: move['white'] + move['black'] + move['draws'] for move in data.get('moves', [])}
 
         if not move_statistics:
-            raise Exception("No move statistics available for this position.")
+            return None
 
         # Calculate the total number of moves played in this position
         total_moves = sum(move_statistics.values())
