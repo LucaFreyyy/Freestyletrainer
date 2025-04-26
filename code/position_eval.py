@@ -13,6 +13,7 @@ class Evaluator:
         self.evaluation_thread = None
         self.eval_label = eval_label  # Reference to the label to update evaluation display
         self.eval_list = eval_list  # Reference to the eval list to update evaluations
+        self.stockfish = Stockfish(path=STOCKFISH_PATH, parameters={"Threads": 2, "Minimum Thinking Time": 30})
 
     def get_cloud_evaluation(self, fen):
         """Fetch evaluation from Lichess cloud API"""
@@ -35,7 +36,7 @@ class Evaluator:
     def update_evaluation_display(self):
         current_eval = self.get_current_evaluation()
         self.eval_label.config(text=current_eval)
-        is_white_move = self.current_evaluation.get('isWhiteMove', True)
+        is_white_move = 'b' in self.current_evaluation['fen'].split(' ')[1]
         self.eval_list.add_eval(current_eval, is_white_move)
 
     def fetch_evaluation_async(self, fen):
@@ -53,16 +54,23 @@ class Evaluator:
         self.evaluation_thread.start()
 
     def get_stockfish_evaluation(self, fen):
-        stockfish = Stockfish(path=STOCKFISH_PATH, parameters={"Threads": 2, "Minimum Thinking Time": 30})
-        stockfish.set_fen_position(fen)
-        evaluation = stockfish.get_evaluation()
-        if evaluation["type"] == "cp":
-            return {"pvs": [{"cp": evaluation["value"]}]}
-        elif evaluation["type"] == "mate":
-            return {"pvs": [{"mate": evaluation["value"]}]}
-        else:
-            print(f"Stockfish evaluation: {evaluation}")
-            return None
+        """Get evaluation from Stockfish and format it like cloud evaluation"""
+        try:
+            self.stockfish.set_fen_position(fen)
+            evaluation = self.stockfish.get_evaluation()
+            if evaluation["type"] == "mate":
+                return {
+                    "fen": fen,
+                    "pvs": [{"mate": evaluation["value"]}]
+                }
+            elif evaluation["type"] == "cp":
+                return {
+                    "fen": fen,
+                    "pvs": [{"cp": evaluation["value"]}]
+                }
+        except Exception as e:
+            print(f"Error with Stockfish evaluation: {e}")
+        return None
         
     def get_current_evaluation(self):
         if self.current_evaluation:
@@ -73,6 +81,6 @@ class Evaluator:
             if mate:
                 return f"Mate in {abs(mate)}" + (" ♔" if mate > 0 else " ♚")
             elif cp:
-                score = cp/100
+                score = cp / 100
                 return f"{'+' if score > 0 else ''}{score:.1f}"
         return "No eval"

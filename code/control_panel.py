@@ -26,6 +26,7 @@ class ControlPanel(tk.Frame):
         
     def new_game(self):
         self.move_list.clear()
+        self.eval_list.clear()
         self.chess_board.new_game()
         self.update_start_position_number()
 

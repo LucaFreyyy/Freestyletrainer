@@ -189,7 +189,7 @@ class ChessBoard(tk.Canvas):
             
             self.draw_board()
 
-        self.evaluate_position()
+            self.evaluate_position()
 
     def new_game(self):
         self.board.reset()
